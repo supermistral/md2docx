@@ -3,7 +3,6 @@ from pathlib import Path
 from celery.result import AsyncResult
 
 from .schemas import TaskType
-from ..config import settings
 
 
 TASK_ID_GENERATORS = {
@@ -22,23 +21,8 @@ def get_task_result(id: str) -> AsyncResult:
     return task
 
 
-def get_media_dir_by_id(id: str) -> Path:
-    return settings.MEDIA_ROOT / 'md2docx' / 'session' / id
+def save_file(file: Path, content: str) -> None:
+    file.resolve().parent.mkdir(parents=True, exist_ok=True)
 
-
-def save_markdown(id: str, content: str) -> None:
-    media_dir = get_media_dir_by_id(id)
-    media_dir.mkdir(parents=True, exist_ok=True)
-
-    file_path = media_dir / 'md.md'
-
-    with open(file_path, 'w') as f:
+    with open(file, 'w') as f:
         f.write(content)
-
-
-def get_markdown_file_path(id: str) -> Path:
-    return get_media_dir_by_id(id) / 'md.md'
-
-
-def get_docx_file_path(id: str) -> Path:
-    return get_media_dir_by_id(id) / 'docx.docx'

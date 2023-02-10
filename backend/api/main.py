@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import uvicorn
 from fastapi import FastAPI, APIRouter
 from starlette.middleware.cors import CORSMiddleware
@@ -11,7 +9,7 @@ from .session.middleware import SessionMiddleware
 
 
 def startup_actions() -> None:
-    Path(settings.MEDIA_ROOT).mkdir(parents=True, exist_ok=True)
+    settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
 
 
 def create_app() -> FastAPI:
