@@ -1,0 +1,8 @@
+__pycache__
+
+venv
+backend/api/media
+backend/md2docx/samples
+
+.env
+.*.env

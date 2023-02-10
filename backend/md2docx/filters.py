@@ -1,0 +1,171 @@
+from typing import Type, Optional
+
+from panflute import (
+    debug, Element, Inline, Image, Span, Str, Space, RawInline, Caption,
+    Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock)
+
+import oxml, config
+
+
+class NumberedBlock:
+    def __init__(self, label, caption, object_number, section_number=None,
+                 identifier='', classes=[], attributes={}):
+        if not section_number:
+            openxml_number = oxml.caption_number(
+                label=label,
+                object_number=object_number
+            )
+        else:
+            openxml_number = oxml.caption_number_with_section(
+                label=label,
+                object_number=object_number,
+                section_number=section_number
+            )
+        
+        new_caption = [
+            Str(label),
+            Space,
+            oxml.to_raw_inline(openxml_number),
+        ]
+
+        if len(caption) > 0:
+            new_caption += [
+                Space,
+                Str('-'),
+                Space,
+                *caption
+            ]
+
+        self.span = Span(
+            *new_caption, 
+            identifier=identifier,
+            classes=classes,
+            attributes=attributes
+        )
+
+    def get_content(self) -> Inline:
+        return self.span
+
+
+class BaseFilter:
+    """Базовый класс для фильтра с метдом run()"""
+
+    def run(self, elem: Element, doc: Doc) -> Optional[Element]:
+        raise NotImplementedError('Filter should have "run" method')
+
+
+class DocMetadataFilter(BaseFilter):
+    def run(self, elem: Element, doc: Doc) -> Optional[Element]:
+        # Adding a page break to the abstract
+        # if isinstance(elem, Div):
+        #     debug(elem)
+        pass
+        # doc.metadata['abstract'] = ' `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`{=openxml}'
+
+
+class CaptionBaseFilter(BaseFilter):
+    """Базовый фильтр для установки нумерации"""
+
+    header_count = 0
+    object_count = 0
+
+    def __init__(self, label: str, elem_class: Type[Element]):
+        self.label = label
+        self.elem_class = elem_class
+
+    def run(self, elem: Element, doc: Doc):
+        if isinstance(elem, Header) and elem.level == 2:
+            self.header_count += 1
+            self.object_count = 0
+        elif isinstance(elem, self.elem_class):
+            self.object_count += 1
+
+            if len(elem.content) > 0 and isinstance(elem.content[0], Plain):
+                elem_caption = elem.content[0].content
+            else:
+                elem_caption = elem.content
+
+            figure_caption = NumberedBlock(self.label, elem_caption, 
+                                           self.object_count, self.header_count)
+            self.save_caption(elem, figure_caption.get_content())
+
+    def save_caption(self, elem: Element, caption: Inline) -> None:
+        elem.content = [caption]
+
+
+class ImageCaptionFilter(CaptionBaseFilter):
+    """Фильтр для установки нумерации на подписях к рисункам"""
+
+    def __init__(self):
+        super().__init__("Рисунок", Image)
+
+
+class TableCaptionFilter(CaptionBaseFilter):
+    """Фильтр для установки нумерации на подписях к таблицам"""
+    
+    def __init__(self):
+        super().__init__("Таблица", Caption)
+
+    def save_caption(self, elem: Element, caption: Inline) -> None:
+        elem.content = [Plain(caption)]
+
+
+class ListFilter(BaseFilter):
+    """Фильтр для установки стилей списков (обычных и литературы)"""
+
+    def check_bibliography(self, elem: Element) -> bool:
+        for elem_class in elem.classes:
+            if elem_class.lower() in config.BIBLIOGRAPHY_LIST_CLASSES:
+                return True
+        return False
+
+    def run(self, elem: Element, doc: Doc):
+        if isinstance(elem, (OrderedList, BulletList)):
+            # Check list for bibliography
+            is_bibliography = isinstance(elem.parent, Div) and self.check_bibliography(elem.parent)
+
+            if is_bibliography and not isinstance(elem, OrderedList):
+                elem = OrderedList(*elem.content)
+
+            for list_item in elem.content:
+                block = list_item.content[0]
+
+                if isinstance(block, Plain):
+                    # Using the Para element to avoid setting 'Compact' style for list
+                    list_item.content[0] = Div(
+                        Para(*block.content),
+                        attributes={'custom-style': 'Bibliography' if is_bibliography else 'Body Text'}
+                    )
+
+            # Add page break after bibliography + add header
+            if is_bibliography:
+                pagebreak_raw_block = oxml.to_raw_block(oxml.pagebreak())
+                return Div(
+                    Header(Str("Список использованной литературы"), level=1),
+                    elem,
+                    pagebreak_raw_block
+                )
+            else:
+                debug([s.content for s in elem.content.list])
+
+            return elem
+
+
+class AlignmentMixin:
+    def set_alignment(self, elem: Element) -> None:
+        openxml = oxml.alignment_by_classes(elem.classes)
+        if openxml is not None:
+            elem.content = [oxml.to_raw_inline(openxml), *elem.content]
+
+
+class HeaderFilter(BaseFilter, AlignmentMixin):
+    """Установка выраванивания и разрывов для заголовков"""
+
+    def run(self, elem: Element, doc: Doc):
+        if isinstance(elem, Header):
+            self.set_alignment(elem)
+
+            # Add page break before lvl 1 header
+            if elem.level == 1:
+                pagebreak_raw_block = oxml.to_raw_block(oxml.pagebreak())
+                return Div(pagebreak_raw_block, elem)

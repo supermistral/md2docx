@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: md2docx_rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    env_file:
+      - ./.rabbitmq.env
+
+  redis:
+    image: redis:latest
+    container_name: md2docx_redis
+    ports:
+      - "6379:6379"
+    env_file:
+      - ./.redis.env
+
+  api:
+    build: ./backend
+    container_name: md2docx_api
+    command: |
+      sh -c "uvicorn --host 0.0.0.0 --port 8000 --reload api.main:app"
+    volumes:
+      - ./backend/:/usr/src/app/
+    ports:
+      - 8000:8000
+    env_file:
+      - ./.env
+
+  celery:
+    build: ./backend
+    container_name: md2docx_celery
+    command: |
+      celery -A api.main:celery_app worker -l info -c 1
+    volumes:
+      - ./backend/:/usr/src/app/
+    env_file:
+      - ./.env
+    depends_on:
+      - rabbitmq
+      - redis
+
+  celery-win:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.win
+    container_name: md2docx_celery-win
+    profiles: ["win"]
+    command: |
+      celery -A api.main:celery_app worker -l info -c 1
+    volumes:
+      - ./backend/:/usr/src/app/
+    env_file:
+      - ./.env
+    depends_on:
+      - rabbitmq
+      - redis
+      

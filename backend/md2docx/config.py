@@ -1,0 +1,18 @@
+from pathlib import Path
+
+
+BASE_DIR = Path(__file__).resolve().parent
+
+PROCESSING_URL = BASE_DIR / 'processing.py'
+
+WORD_REFERENCE_PATH = BASE_DIR / 'samples' / 'reference2.docx'
+
+ALIGN_CLASSES = {
+    'right': ['right', 'справа'],
+    'left': ['left', 'слева'],
+}
+
+BIBLIOGRAPHY_LIST_CLASSES = [
+    'литература',
+    'bibliography'
+]
