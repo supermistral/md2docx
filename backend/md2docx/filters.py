@@ -1,10 +1,12 @@
 from typing import Type, Optional
 
 from panflute import (
-    debug, Element, Inline, Image, Span, Str, Space, RawInline, Caption,
-    Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock)
+    debug, Element, Inline, Image, Span, Str, Space, RawInline, Caption, Block,
+    Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock,
+    ListContainer)
 
 import oxml, config
+from utils import pack_attributes, escape_text_with_attributes
 
 
 class NumberedBlock:
@@ -47,6 +49,13 @@ class NumberedBlock:
         return self.span
 
 
+class AlignmentMixin:
+    def set_alignment(self, elem: Element) -> None:
+        openxml = oxml.alignment_by_classes(elem.classes)
+        if openxml is not None:
+            elem.content = [oxml.to_raw_inline(openxml), *elem.content]
+
+
 class BaseFilter:
     """Базовый класс для фильтра с метдом run()"""
 
@@ -57,8 +66,6 @@ class BaseFilter:
 class DocMetadataFilter(BaseFilter):
     def run(self, elem: Element, doc: Doc) -> Optional[Element]:
         # Adding a page break to the abstract
-        # if isinstance(elem, Div):
-        #     debug(elem)
         pass
         # doc.metadata['abstract'] = ' `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`{=openxml}'
 
@@ -145,17 +152,10 @@ class ListFilter(BaseFilter):
                     elem,
                     pagebreak_raw_block
                 )
-            else:
-                debug([s.content for s in elem.content.list])
+            # else:
+                # debug([s.content for s in elem.content.list])
 
             return elem
-
-
-class AlignmentMixin:
-    def set_alignment(self, elem: Element) -> None:
-        openxml = oxml.alignment_by_classes(elem.classes)
-        if openxml is not None:
-            elem.content = [oxml.to_raw_inline(openxml), *elem.content]
 
 
 class HeaderFilter(BaseFilter, AlignmentMixin):
@@ -169,3 +169,45 @@ class HeaderFilter(BaseFilter, AlignmentMixin):
             if elem.level == 1:
                 pagebreak_raw_block = oxml.to_raw_block(oxml.pagebreak())
                 return Div(pagebreak_raw_block, elem)
+
+
+class AttributeTaggingFilter(BaseFilter):
+    """Маркировка аттрибутов - упаковка в текст для последующей обработки"""
+
+    attrs_id = 0
+
+    def check_attributes(self, attributes: dict[str, str]) -> bool:
+        for attr in attributes:
+            if (attr not in config.ATTRIBUTES_VALIDATORS or
+                not config.ATTRIBUTES_VALIDATORS[attr](attributes[attr])):
+                    # TODO: add error collector
+                    return False
+        return True
+
+    def insert_packed_attributes(self, content: ListContainer,
+                                 attrs_start: Optional[str], attrs_end: Optional[str]) -> None:
+        if content.oktypes == Inline:
+            if attrs_start is not None:
+                content.insert(0, Str(attrs_start))
+            if attrs_end is not None:
+                content.append(Str(attrs_end))
+        else:
+            self.insert_packed_attributes(content[0].content, attrs_start, None)
+            self.insert_packed_attributes(content[-1].content, None, attrs_end)
+
+    def run(self, elem: Element, doc: Doc):
+        if hasattr(elem, 'text'):
+            elem.text = escape_text_with_attributes(elem.text)
+
+        if hasattr(elem, 'attributes'):
+            attributes = getattr(elem, 'attributes')
+
+            if not attributes or not self.check_attributes(attributes):
+                return elem
+
+            attrs_start, attrs_end = pack_attributes(attributes, id=self.attrs_id)
+            self.attrs_id += 1
+
+            self.insert_packed_attributes(elem.content, attrs_start, attrs_end)
+
+        return elem

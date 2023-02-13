@@ -16,3 +16,7 @@ BIBLIOGRAPHY_LIST_CLASSES = [
     'литература',
     'bibliography'
 ]
+
+ATTRIBUTES_VALIDATORS = {
+    'fontsize': lambda x: x.isnumeric(),
+}

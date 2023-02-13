@@ -4,7 +4,7 @@ from panflute import run_filters, debug, Element, Doc
 
 from filters import (
     BaseFilter, ImageCaptionFilter, TableCaptionFilter, HeaderFilter,
-    ListFilter, DocMetadataFilter
+    ListFilter, DocMetadataFilter, AttributeTaggingFilter
 )
 
 
@@ -15,6 +15,7 @@ def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
         TableCaptionFilter,
         ListFilter,
         HeaderFilter,
+        AttributeTaggingFilter
     ]
 
     return [filter_class().run for filter_class in filter_classes]
