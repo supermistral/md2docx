@@ -1,9 +1,12 @@
 from enum import Enum
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class Markdown(BaseModel):
     code: str
+    images_names: Optional[list[Optional[str]]] = None
 
 
 class Task(BaseModel):
