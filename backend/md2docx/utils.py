@@ -1,7 +1,6 @@
 import base64
 import json
 import re
-from panflute import debug
 
 
 def escape_text_with_attributes(text: str) -> str:

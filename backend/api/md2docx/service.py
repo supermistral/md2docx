@@ -32,7 +32,7 @@ class Md2DocxService:
             save_file_by_chunk(image.file, filename)
 
     def get_session_dir_by_id(self, id: str) -> Path:
-        return settings.MEDIA_ROOT / 'md2docx' / 'session' / id
+        return settings.SESSION_ROOT / id
 
     def get_markdown_file_path(self, id: str) -> str:
         return str(self.get_session_dir_by_id(id) / 'md.md')

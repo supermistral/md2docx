@@ -1,8 +1,9 @@
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseSettings
+from celery.schedules import crontab
 
 
 class Settings(BaseSettings):
@@ -19,6 +20,13 @@ class Settings(BaseSettings):
     CELERY_broker_url: str = os.environ.get('CELERY_BROKER_URL')
     CELERY_result_backend: str = os.environ.get('CELERY_RESULT_BACKEND')
     CELERY_timezone: str = os.environ.get('TZ', 'Europe/London')
+    CELERY_IMPORTS: list[str] = ['api.md2docx.tasks', 'api.session.tasks']
+    CELERY_BEAT_SCHEDULE: dict[str, dict[str, Any]] = {
+        'check_and_delete_sessions': {
+            'task': 'api.session.tasks.delete_wrong_sessions',
+            'schedule': crontab(),
+        }
+    }
 
     SESSION_BACKEND_URL: str = os.environ.get('SESSION_BACKEND_URL')
     SESSION_COOKIE: str = 'session'
@@ -28,6 +36,7 @@ class Settings(BaseSettings):
 
     MEDIA_URL: str = 'media'
     MEDIA_ROOT: Path = BASE_DIR / MEDIA_URL
+    SESSION_ROOT: Path = MEDIA_ROOT / 'md2docx' / 'session'
 
 
 def get_settings() -> Settings:

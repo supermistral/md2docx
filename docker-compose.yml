@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   rabbitmq:
-    image: rabbitmq:latest
+    image: rabbitmq:alpine
     container_name: md2docx_rabbitmq
     ports:
       - "5672:5672"
@@ -11,7 +11,7 @@ services:
       - ./.rabbitmq.env
 
   redis:
-    image: redis:latest
+    image: redis:alpine
     container_name: md2docx_redis
     ports:
       - "6379:6379"
@@ -58,4 +58,16 @@ services:
     depends_on:
       - rabbitmq
       - redis
-      
+
+  celery-beat:
+    build: ./backend
+    container_name: md2docx_celery-beat
+    command: |
+      celery -A api.main:celery_app beat -l info
+    volumes:
+      - ./backend/:/usr/src/app/
+    env_file:
+      - ./.env
+    depends_on:
+      - rabbitmq
+      - redis

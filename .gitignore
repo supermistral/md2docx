@@ -6,3 +6,5 @@ backend/md2docx/samples
 
 .env
 .*.env
+
+celerybeat-schedule

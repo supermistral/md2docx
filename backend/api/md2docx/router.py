@@ -1,27 +1,28 @@
-from typing import Any, Union
+from typing import Any, Optional
 
 from fastapi import APIRouter, Request, Depends, UploadFile
-from fastapi.exceptions import HTTPException
 
-from .schemas import Markdown, Task
+from .schemas import MarkdownForm, Task
 from .utils import get_task_result
 from .service import get_md2docx_service, Md2DocxService
+from .dependencies import verify_session
 
 
-router = APIRouter(prefix='/md2docx', tags=['md2docx'])
+router = APIRouter(
+    prefix='/md2docx',
+    tags=['md2docx'],
+    dependencies=[Depends(verify_session)]
+)
 
 
 @router.post('/')
 async def post_process_md2docx(
     request: Request,
-    md: Markdown,
-    images: Union[list[UploadFile], None] = None,
+    md: MarkdownForm = Depends(),
+    images: Optional[list[UploadFile]] = None,
     service: Md2DocxService = Depends(get_md2docx_service),
 ) -> Any:
     session_id = request.session.get('id')
-
-    if not session_id:
-        raise HTTPException(400, detail="Session is incorrect")
 
     service.save_markdown(session_id, md.code)
 
@@ -36,10 +37,6 @@ async def post_process_md2docx(
 @router.get('/')
 async def get_task_response(request: Request) -> Any:
     session_id = request.session.get('id')
-
-    if not session_id:
-        raise HTTPException(400, detail="Session is incorrect")
-
     task = get_task_result(session_id)
 
     return Task(status=task.state)
