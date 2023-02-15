@@ -5,7 +5,8 @@ from panflute import (
     Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock,
     ListContainer)
 
-import oxml, config
+import oxml
+import config
 from utils import pack_attributes, escape_text_with_attributes
 
 
@@ -66,6 +67,7 @@ class BaseFilter:
 class DocMetadataFilter(BaseFilter):
     def run(self, elem: Element, doc: Doc) -> Optional[Element]:
         # Adding a page break to the abstract
+        # debug(doc.metadata.content. dict)
         pass
         # doc.metadata['abstract'] = ' `<w:p><w:r><w:br w:type="page"/></w:r></w:p>`{=openxml}'
 
@@ -146,7 +148,7 @@ class ListFilter(BaseFilter):
 
             # Add page break after bibliography + add header
             if is_bibliography:
-                pagebreak_raw_block = oxml.to_raw_block(oxml.pagebreak())
+                pagebreak_raw_block = oxml.to_raw_block(oxml.PAGEBREAK)
                 return Div(
                     Header(Str("Список использованной литературы"), level=1),
                     elem,
@@ -167,7 +169,7 @@ class HeaderFilter(BaseFilter, AlignmentMixin):
 
             # Add page break before lvl 1 header
             if elem.level == 1:
-                pagebreak_raw_block = oxml.to_raw_block(oxml.pagebreak())
+                pagebreak_raw_block = oxml.to_raw_block(oxml.PAGEBREAK)
                 return Div(pagebreak_raw_block, elem)
 
 

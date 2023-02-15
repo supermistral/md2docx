@@ -4,7 +4,7 @@ from typing import Optional
 from docx import Document
 from docx.shared import Pt, Cm
 
-from .utils import unpack_attributes, search_end_of_text_attributes
+from ..utils import unpack_attributes, search_end_of_text_attributes
 
 
 class PostProcessing:

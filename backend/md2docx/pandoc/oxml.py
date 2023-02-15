@@ -5,7 +5,7 @@ import panflute as pf
 import config
 
 
-OPENXML_CAPTION_NUMBER_WITH_SECTION = '''
+CAPTION_NUMBER_WITH_SECTION_TEMPLATE = '''
 <w:fldSimple w:instr=" STYLEREF 2 \s ">
 <w:r><w:t>{1}</w:t></w:r>
 </w:fldSimple>
@@ -17,37 +17,35 @@ OPENXML_CAPTION_NUMBER_WITH_SECTION = '''
 </w:fldSimple>
 '''
 
-OPENXML_CAPTION_NUMBER = '''
+CAPTION_NUMBER_TEMPLATE = '''
 <w:fldSimple w:instr=" SEQ {} \* ARABIC ">
 <w:r><w:t>{}</w:t></w:r>
 </w:fldSimple>
 '''
 
-OPENXML_ALIGNMENT = '''
+ALIGNMENT_TEMPLATE = '''
 <w:pPr>
 <w:jc w:val="{}"/>
 </w:pPr>
 '''
+
+PAGEBREAK = "<w:p><w:r><w:br w:type=\"page\" /></w:r></w:p>"
 
 
 def alignment_by_classes(style_classes: list[str]) -> Optional[str]:
     for style_class in style_classes:
         for align_class in config.ALIGN_CLASSES:
             if style_class in config.ALIGN_CLASSES[align_class]:
-                return OPENXML_ALIGNMENT.format(align_class)
+                return ALIGNMENT_TEMPLATE.format(align_class)
     return None
 
 
 def caption_number(label: str, object_number: int) -> str:
-    return OPENXML_CAPTION_NUMBER.format(label, object_number)
+    return CAPTION_NUMBER_TEMPLATE.format(label, object_number)
 
 
 def caption_number_with_section(label: str, object_number: int, section_number: int) -> str:
-    return OPENXML_CAPTION_NUMBER_WITH_SECTION.format(label, section_number, object_number)
-
-
-def pagebreak() -> str:
-    return "<w:p><w:r><w:br w:type=\"page\" /></w:r></w:p>"
+    return CAPTION_NUMBER_WITH_SECTION_TEMPLATE.format(label, section_number, object_number)
 
 
 def to_raw_block(openxml: str) -> pf.RawBlock:

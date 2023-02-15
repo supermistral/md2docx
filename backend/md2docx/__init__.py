@@ -1,14 +1,10 @@
-import os, subprocess, sys
+import os
+import subprocess
 from typing import Optional
 
 from . import config
 from .exceptions import ProcessingError, WinProcessingError, PostProcessingError
-from .post_processing import main as start_post_processing
-
-if sys.platform.startswith('win'):
-    from .win_processing import main as start_win_processing
-else:
-    start_win_processing = lambda x, y: None
+from .processing import start_post_processing, start_win_processing
 
 
 __all__ = ['run_processing', 'run_win_processing', 'run_post_processing']

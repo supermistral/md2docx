@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-PROCESSING_URL = BASE_DIR / 'processing.py'
+PROCESSING_URL = BASE_DIR / 'pandoc' / 'run.py'
 
 WORD_REFERENCE_PATH = BASE_DIR / 'samples' / 'reference2.docx'
 

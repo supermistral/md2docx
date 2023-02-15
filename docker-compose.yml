@@ -62,6 +62,7 @@ services:
   celery-beat:
     build: ./backend
     container_name: md2docx_celery-beat
+    profiles: ["celery-beat"]
     command: |
       celery -A api.main:celery_app beat -l info
     volumes:
