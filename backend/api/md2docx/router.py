@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
-from fastapi import APIRouter, Request, Depends, UploadFile
+from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile
+from fastapi.responses import FileResponse
 
 from .schemas import MarkdownForm, Task
 from .utils import get_task_result
@@ -40,3 +41,18 @@ async def get_task_response(request: Request) -> Any:
     task = get_task_result(session_id)
 
     return Task(status=task.state)
+
+
+@router.get('/document/')
+async def get_document(
+    request: Request,
+    service: Md2DocxService = Depends(get_md2docx_service),
+) -> Any:
+    session_id = request.session.get('id')
+    file = service.get_docx_file(session_id)
+
+    if file is None:
+        raise HTTPException(404)
+
+    path, name = file
+    return FileResponse(path, filename=name, media_type='application/octet-stream')

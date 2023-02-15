@@ -1,3 +1,4 @@
+import uuid
 from pathlib import Path
 from typing import Generator, Optional
 
@@ -48,6 +49,15 @@ class Md2DocxService:
             process_md2docx.subtask((md_file, docx_file), task_id=get_task_id(id, TaskType.PROCESSING))
             # | post_process_md2docx.subtask((docx_file,), task_id=get_task_id(id, TaskType.POST_PROCESSING))
         ).apply_async(task_id=id)
+
+    def get_docx_file(self, id: str) -> Optional[tuple[str, str]]:
+        path = self.get_docx_file_path(id)
+
+        if not Path(path).is_file():
+            return None
+
+        name = uuid.uuid4().hex
+        return path, name
 
 
 def get_md2docx_service() -> Generator[Md2DocxService, None, None]:
