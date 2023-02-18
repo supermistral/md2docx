@@ -2,10 +2,15 @@ from typing import Callable, Optional
 
 from panflute import run_filters, debug, Element, Doc
 
-from filters import (
+from pandoc.helpers import validate_metadata
+from pandoc.filters import (
     BaseFilter, ImageCaptionFilter, TableCaptionFilter, HeaderFilter,
     ListFilter, DocMetadataFilter, AttributeTaggingFilter
 )
+
+
+def prepare(doc: Doc) -> None:
+    validate_metadata(doc)
 
 
 def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
@@ -22,7 +27,7 @@ def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
 
 
 def main(doc: Optional[Doc] = None) -> None:
-    return run_filters(get_filters(), doc=doc)
+    return run_filters(get_filters(), doc=doc, prepare=prepare)
 
 
 if __name__ == '__main__':

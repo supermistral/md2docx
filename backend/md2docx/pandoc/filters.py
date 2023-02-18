@@ -5,9 +5,10 @@ from panflute import (
     Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock,
     ListContainer)
 
-import oxml
 import config
 from utils import pack_attributes, escape_text_with_attributes
+from validators import get_validator
+from pandoc import oxml
 
 
 class NumberedBlock:
@@ -181,7 +182,7 @@ class AttributeTaggingFilter(BaseFilter):
     def check_attributes(self, attributes: dict[str, str]) -> bool:
         for attr in attributes:
             if (attr not in config.ATTRIBUTES_VALIDATORS or
-                not config.ATTRIBUTES_VALIDATORS[attr](attributes[attr])):
+                not get_validator(config.ATTRIBUTES_VALIDATORS[attr])(attributes[attr])):
                     # TODO: add error collector
                     return False
         return True

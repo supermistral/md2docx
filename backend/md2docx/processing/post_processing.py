@@ -3,6 +3,7 @@ from typing import Optional
 
 from docx import Document
 from docx.shared import Pt, Cm
+from docx.text.paragraph import Paragraph
 
 from ..utils import unpack_attributes, search_end_of_text_attributes
 
@@ -16,21 +17,33 @@ class PostProcessing:
             'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
         }
 
-    def handle_fontsize(self, p, value: str) -> None:
+    def handle_fontsize(self, p: Paragraph, value: str) -> None:
         size = int(value)
         for r in p.runs:
             r.font.size = Pt(size)
 
-    def apply_attributes(self, para, attributes: dict[str, str]) -> None:
+    def handle_left_indent(self, p: Paragraph, value: str) -> None:
+        p.paragraph_format.left_indent = Cm(float(value))
+
+    def handle_right_indent(self, p: Paragraph, value: str) -> None:
+        p.paragraph_format.right_indent = Cm(float(value))
+
+    def handle_first_line_indent(self, p: Paragraph, value: str) -> None:
+        p.paragraph_format.first_line_indent = Cm(float(value))
+
+    def handle_line_spacing(self, p: Paragraph, value: str) -> None:
+        p.paragraph_format.line_spacing = float(value)
+
+    def apply_attributes(self, para: Paragraph, attributes: dict[str, str]) -> None:
         for attr in attributes:
             handler = getattr(self, 'handle_' + attr, None)
             if handler is not None:
                 handler(para, attributes[attr])
 
-    def is_list(self, para) -> bool:
+    def is_list(self, para: Paragraph) -> bool:
         return len(para._element.xpath('./w:pPr/w:numPr')) > 0
 
-    def pre_process_lists(self, para) -> None:
+    def pre_process_lists(self, para: Paragraph) -> None:
         num_id = para._p.pPr.numPr.numId.val
         self.num_ids.add(num_id)
 
@@ -57,7 +70,6 @@ class PostProcessing:
                 lvl_xpath = get_lvl_xpath(lvl)
                 lvl = abstract_num.xpath(lvl_xpath, namespaces=self.namespaces)[0]
                 # TODO: custom lists formatting
-
 
     def process(self) -> None:
         attrs_end = True

@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import Form
 from pydantic import BaseModel
@@ -18,6 +18,12 @@ class MarkdownForm:
     ):
         self.code = code
         self.images_names = images_names
+
+
+class TaskError(BaseModel):
+    status: str
+    error: str
+    detail: Any
 
 
 class Task(BaseModel):

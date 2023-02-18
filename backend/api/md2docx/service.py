@@ -5,15 +5,17 @@ from typing import Generator, Optional
 from fastapi import UploadFile
 
 from .tasks import process_md2docx, post_process_md2docx
-from .schemas import TaskType
-from .utils import save_file, get_task_id, save_file_by_chunk, create_file_directory
+from .schemas import TaskError, TaskType
+from .utils import (
+    save_file, get_task_id, save_file_by_chunk, create_file_directory,
+    search_serialized_error
+)
 from ..config import settings
 
 
 class Md2DocxService:
     def save_markdown(self, id: str, content: str) -> None:
-        session_dir = self.get_session_dir_by_id(id)
-        file = session_dir / 'md.md'
+        file = self.get_markdown_file_path(id)
 
         create_file_directory(file)
         save_file(file, content)
@@ -58,6 +60,15 @@ class Md2DocxService:
 
         name = uuid.uuid4().hex
         return path, name
+
+    def build_error_message(self, exc: Exception, status: str) -> TaskError:
+        result = search_serialized_error(str(exc))
+
+        if result is None:
+            return TaskError(error="UnknownError", detail="Unknown error", status=status)
+
+        error, detail = result
+        return TaskError(error=error, detail=detail, status=status)
 
 
 def get_md2docx_service() -> Generator[Md2DocxService, None, None]:

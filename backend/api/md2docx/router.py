@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile
 from fastapi.responses import FileResponse
+from celery import states as celery_states
 
 from .schemas import MarkdownForm, Task
 from .utils import get_task_result
@@ -36,9 +37,15 @@ async def post_process_md2docx(
 
 
 @router.get('/')
-async def get_task_response(request: Request) -> Any:
+async def get_task_response(
+    request: Request,
+    service: Md2DocxService = Depends(get_md2docx_service),
+) -> Any:
     session_id = request.session.get('id')
     task = get_task_result(session_id)
+
+    if task.state == celery_states.FAILURE:
+        return service.build_error_message(exc=task.result, status=task.state)
 
     return Task(status=task.state)
 

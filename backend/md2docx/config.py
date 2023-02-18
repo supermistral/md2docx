@@ -3,7 +3,7 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
 
-PROCESSING_URL = BASE_DIR / 'pandoc' / 'run.py'
+PROCESSING_URL = BASE_DIR / 'pandoc.py'
 
 WORD_REFERENCE_PATH = BASE_DIR / 'samples' / 'reference2.docx'
 
@@ -18,5 +18,15 @@ BIBLIOGRAPHY_LIST_CLASSES = [
 ]
 
 ATTRIBUTES_VALIDATORS = {
-    'fontsize': lambda x: x.isnumeric(),
+    'fontsize': 'validators.integer_validator',
+    'left-indent': 'validators.float_validator',
+    'right-indent': 'validators.float_validator',
+    'first-line-indent': 'validators.float_validator',
+    'line-spacing': 'validators.float_validator',
+}
+
+METADATA_VALIDATORS = {
+    **ATTRIBUTES_VALIDATORS,
+
+    'list': 'validators.list_validator',
 }

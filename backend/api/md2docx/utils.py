@@ -1,7 +1,9 @@
 import shutil
+import json
+import re
 from pathlib import Path
 from tempfile import SpooledTemporaryFile
-from typing import Union
+from typing import Any, Optional, Union
 
 from celery.result import AsyncResult
 
@@ -24,8 +26,8 @@ def get_task_result(id: str) -> AsyncResult:
     return task
 
 
-def create_file_directory(path: Path) -> None:
-    path.resolve().parent.mkdir(parents=True, exist_ok=True)
+def create_file_directory(path: str) -> None:
+    Path(path).resolve().parent.mkdir(parents=True, exist_ok=True)
 
 
 def save_file(file: Path, content: str) -> None:
@@ -36,3 +38,12 @@ def save_file(file: Path, content: str) -> None:
 def save_file_by_chunk(file: SpooledTemporaryFile, name: Union[Path, str]) -> None:
     with open(name, 'wb+') as f:
         shutil.copyfileobj(file, f)
+
+
+def search_serialized_error(traceback: str) -> Optional[tuple[str, Any]]:
+    regex = re.search(r'(\w+): (.+?)\n', traceback)
+
+    if regex is None:
+        return None
+
+    return regex.group(1), json.loads(regex.group(2))
