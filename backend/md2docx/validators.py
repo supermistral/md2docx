@@ -1,6 +1,8 @@
 import importlib
 from typing import Any, Callable, Union
 
+from panflute import debug
+
 import config
 from exceptions import MetadataValidationErrorItem, MetadataValidationErrorType
 
@@ -10,6 +12,10 @@ def concat_keys(key: str, child_key: str) -> str:
     Creates keys path e.g. ``list.lvl.0.something``
     """
     return key + ('.' if key else '') + child_key
+
+
+def _is_class(value: str) -> bool:
+    return value.startswith('.')
 
 
 def _value_validator(
@@ -23,6 +29,12 @@ def _value_validator(
     on the incoming validators map
     """
     full_key = concat_keys(key, current_key)
+
+    # Class block can contain any attributes according to the 'validators' arg
+    if _is_class(current_key):
+        # debug(current_key, value)
+        return _existing_attributes_validator(full_key, value, errors=[], validators=validators)
+
     validator_module = validators.get(current_key, None)
 
     if validator_module is None:
@@ -92,15 +104,23 @@ def _existing_attributes_validator(
     key: str,
     value: Any,
     errors: list[MetadataValidationErrorItem],
-) -> None:
+    validators: dict[str, str] = config.ATTRIBUTES_VALIDATORS
+) -> list[MetadataValidationErrorItem]:
     """
     Checks if a dictionary key exists in ``config.ATTRIBUTES_VALIDATORS``
     """
     if not _is_dict_validator(key, value, errors=errors):
-        return
+        return errors
 
     for current_key, current_value in value.items():
-        errors += _value_validator(key=key, current_key=current_key, value=current_value)
+        errors += _value_validator(
+            key=key,
+            current_key=current_key,
+            value=current_value,
+            validators=validators
+        )
+
+    return errors
 
 
 def _list_lvl_validator(key: str, value: Any, errors: list[MetadataValidationErrorItem]) -> None:
