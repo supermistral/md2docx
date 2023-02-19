@@ -8,3 +8,5 @@ backend/md2docx/samples
 .*.env
 
 celerybeat-schedule
+
+node_modules

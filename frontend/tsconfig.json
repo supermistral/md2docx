@@ -1,0 +1,45 @@
+{
+    "compilerOptions": {
+        "target": "ES5",
+        "lib": [
+            "DOM",
+            "DOM.Iterable",
+            "ESNext"
+        ],
+        "allowJs": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "module": "ESNext",
+        "moduleResolution": "node",
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+        "noEmit": false,
+        "jsx": "react-jsx",
+        "sourceMap": true,
+        "declaration": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "incremental": true,
+        "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true,
+        "outDir": "build",
+    },
+    "ts-node": {
+        "compilerOptions": {
+            "module": "CommonJS"
+        }
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "node_modules",
+        "build"
+    ]
+}
