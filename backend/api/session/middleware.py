@@ -52,7 +52,7 @@ class SessionMiddleware:
         connection = HTTPConnection(scope)
         initial_session_was_empty = True
 
-        is_session_generated = False
+        session_generated = False
 
         if self.session_cookie in connection.cookies:
             data = connection.cookies[self.session_cookie].encode("utf-8")
@@ -65,9 +65,10 @@ class SessionMiddleware:
         else:
             scope["session"] = {}
 
-        if "id" not in scope["session"]:
+        # Generate session id when POST request is made
+        if scope["method"] == "POST":
             scope["session"]["id"] = await session_storage.generate_session_id()
-            is_session_generated = True
+            session_generated = True
 
         async def send_wrapper(message: Message) -> None:
             if message["type"] == "http.response.start":
@@ -85,9 +86,8 @@ class SessionMiddleware:
                     )
                     headers.append("Set-Cookie", header_value)
 
-                    # Add session id to the storage when id is new generated and
-                    #   POST request is made
-                    if is_session_generated and scope["method"]:
+                    # Add session id to the storage when id is new generated
+                    if session_generated:
                         await session_storage.add_session(scope["session"]["id"], data)
                 elif not initial_session_was_empty:
                     # The session has been cleared.
