@@ -1,6 +1,7 @@
 import * as path from "path";
 import * as webpack from "webpack";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import { CleanWebpackPlugin } from "clean-webpack-plugin";
 import "webpack-dev-server";
 
 
@@ -28,10 +29,12 @@ const config: webpack.Configuration = {
                 }
             },
             {
-                test: /\.css$/,
+                test: /\.(s[ac]ss|css)$/,
                 use: [
                     "style-loader",
-                    "css-loader"
+                    "css-loader",
+                    "postcss-loader",
+                    "sass-loader",
                 ]
             },
             {
@@ -40,7 +43,7 @@ const config: webpack.Configuration = {
                 use: ["ts-loader"],
             },
             {
-                test: /\.(woff(2)?|eot|ttf|otf|svg|)$/,
+                test: /\.(woff(2)?|eot|ttf|otf|svg)$/,
                 type: 'asset/inline',
             },
             {
@@ -66,6 +69,7 @@ const config: webpack.Configuration = {
         new webpack.DefinePlugin({
             "process.env": JSON.stringify(process.env)
         }),
+        new CleanWebpackPlugin(),
     ],
 };
 

@@ -1,0 +1,41 @@
+@import "../../variables";
+
+#header {
+    flex-grow: 0 !important;
+    font-size: 1.5em;
+    background-color: $colorHeader;
+    height: $headerHeight;
+    
+    .header-content {
+        display: flex;
+
+        & > * {
+            padding: 0.5rem 1rem;
+        }
+
+        .header-logo {
+            font-size: 2rem;
+            font-weight: 600;
+
+            .md {
+                color: $colorGray;
+            }
+
+            .to {
+                padding: 0 2px;
+            }
+
+            .docx {
+                color: $colorDarkBlue;
+            }
+        }
+
+        .header-docs {
+            line-height: 1.5;
+
+            .icon {
+                margin-right: 0.25em;
+            }
+        }
+    }
+}

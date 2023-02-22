@@ -1,0 +1,39 @@
+@import "../../variables";
+
+.main-container {
+    display: flex;
+    height: calc(100% - $headerHeight);
+}
+
+.editor {
+    display: flex;
+    flex-grow: 1;
+    max-width: $contentWidth;
+    margin: 0 auto;
+
+    & > * {
+        width: 50%;
+    }
+
+    .editor-area {
+        padding: 0.5em 1.5em;
+        overflow: auto;
+        height: 100%;
+    }
+
+    .editor-preview {
+        pre {
+            white-space: pre-wrap;
+        }
+    }
+
+    .editor-input {
+        textarea {
+            width: 100%;
+            outline: none;
+            resize: none;
+            margin: 0;
+            border: 0;
+        }
+    }
+}

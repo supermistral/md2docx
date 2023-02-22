@@ -1,0 +1,22 @@
+@import "../../../variables";
+
+.sidebar {
+    height: 100%;
+    background-color: $colorBrightGray;
+
+    .sidebar-content {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+
+        .sidebar-button {
+            font-size: 1.5em;
+            padding: 0.75em;
+
+            &:hover {
+                background-color: $colorGray;
+            }
+        }
+    }    
+}
