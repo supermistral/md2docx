@@ -8,9 +8,12 @@
     
     .header-content {
         display: flex;
+        height: 100%;
+        align-items: stretch;
 
         & > * {
-            padding: 0.5rem 1rem;
+            padding: 0 1rem;
+            line-height: $headerHeight;
         }
 
         .header-logo {
@@ -31,7 +34,6 @@
         }
 
         .header-docs {
-            line-height: 1.5;
 
             .icon {
                 margin-right: 0.25em;

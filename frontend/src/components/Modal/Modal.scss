@@ -1,0 +1,17 @@
+@import "../../variables";
+
+.popup-overlay {
+    background-color: rgba(0, 0, 0, .3);
+}
+
+.popup-content {
+    margin-top: calc($headerHeight + 3em) !important;
+
+    .modal {
+        max-width: $modalWidth;
+        padding: 1em;
+        border-radius: 5px;
+        background-color: rgb(40, 42, 54);
+        color: $colorWhite;
+    }
+}
