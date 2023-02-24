@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile
 from fastapi.responses import FileResponse
@@ -50,13 +50,14 @@ async def get_task_response(
     return Task(status=task.state)
 
 
-@router.get('/document/')
+@router.get('/document/{doc_format}')
 async def get_document(
+    doc_format: Literal['docx', 'pdf'],
     request: Request,
     service: Md2DocxService = Depends(get_md2docx_service),
 ) -> Any:
     session_id = request.session.get('id')
-    file = service.get_docx_file(session_id)
+    file = service.get_document(session_id, doc_format=doc_format)
 
     if file is None:
         raise HTTPException(404)

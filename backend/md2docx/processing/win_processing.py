@@ -13,22 +13,28 @@ def get_file_path(file: str) -> str:
     return os.path.join(script_dir, file)
 
 
-def main(input_file: str, output_file: Optional[str] = None) -> None:
-    file_path = get_file_path(input_file)
+def main(input_file: str, output_file: Optional[str] = None, pdf: bool = True) -> None:
+    input_file_path = get_file_path(input_file)
 
     word = win32com.client.DispatchEx("Word.Application")
-    doc = word.Documents.Open(file_path)
+    doc = word.Documents.Open(input_file_path)
 
     doc.TablesOfContents(1).Update()
 
     if output_file is None:
-        doc.Close(SaveChanges=True)
+        close_options = {'SaveChanges': True}
+        if pdf:
+            pdf_file = input_file_path
     else:
         output_file_path = get_file_path(output_file)
-        doc.SaveAs(output_file_path)
-        doc.Close()
+        pdf_file = output_file_path.rsplit('.', 1)[0] + '.pdf'
+        close_options = {'FileName': output_file_path}
 
-    print("OK")
+    if pdf:
+        doc.SaveAs(pdf_file, FileFormat=17)
+
+    doc.SaveAs(**close_options)
+    doc.Close()
 
     word.Quit()
 

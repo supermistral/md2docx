@@ -1,6 +1,6 @@
 import uuid
 from pathlib import Path
-from typing import Generator, Optional
+from typing import Generator, Literal, Optional
 
 from fastapi import UploadFile
 
@@ -43,6 +43,9 @@ class Md2DocxService:
     def get_docx_file_path(self, id: str) -> str:
         return str(self.get_session_dir_by_id(id) / 'docx.docx')
 
+    def get_pdf_file_path(self, id: str) -> str:
+        return str(self.get_session_dir_by_id(id) / 'pdf.pdf')
+
     def run_processing_tasks(self, id: str) -> None:
         md_file = self.get_markdown_file_path(id)
         docx_file = self.get_docx_file_path(id)
@@ -58,7 +61,22 @@ class Md2DocxService:
         if not Path(path).is_file():
             return None
 
-        name = uuid.uuid4().hex
+        name = uuid.uuid4().hex + '.docx'
+        return path, name
+
+    def get_document(self, id: str, doc_format: Literal['docx', 'pdf']):
+        file_data = {
+            'docx': (self.get_docx_file_path, '.docx'),
+            'pdf': (self.get_pdf_file_path, '.pdf'),
+        }
+
+        path_getter, ext = file_data[doc_format]
+        path = path_getter(id)
+
+        if not Path(path).is_file():
+            return None
+
+        name = uuid.UUID(id).hex + ext
         return path, name
 
     def build_error_message(self, exc: Exception, status: str) -> TaskError:
