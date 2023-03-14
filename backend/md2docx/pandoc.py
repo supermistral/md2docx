@@ -2,6 +2,14 @@ from typing import Callable, Optional
 
 from panflute import run_filters, debug, Element, Doc
 
+# Check for isolated run as a pandoc filter
+# Need to make the root directory visible
+try:
+    import md2docx
+except ModuleNotFoundError:
+    import sys
+    sys.path.append('..')
+
 from pandoc.helpers import validate_metadata
 from pandoc.filters import (
     BaseFilter, ImageCaptionFilter, TableCaptionFilter, HeaderFilter,

@@ -20,14 +20,17 @@ class MarkdownForm:
         self.images_names = images_names
 
 
-class TaskError(BaseModel):
+class TaskBase:
     status: str
+
+
+class TaskError(TaskBase):
     error: str
     detail: Any
 
 
-class Task(BaseModel):
-    status: str
+class Task(TaskBase):
+    pass
 
 
 class TaskType(Enum):

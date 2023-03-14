@@ -64,7 +64,7 @@ class Md2DocxService:
         name = uuid.uuid4().hex + '.docx'
         return path, name
 
-    def get_document(self, id: str, doc_format: Literal['docx', 'pdf']):
+    def get_document(self, id: str, doc_format: Literal['docx', 'pdf']) ->  Optional[tuple[str, str]]:
         file_data = {
             'docx': (self.get_docx_file_path, '.docx'),
             'pdf': (self.get_pdf_file_path, '.pdf'),

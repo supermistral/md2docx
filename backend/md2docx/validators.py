@@ -3,8 +3,8 @@ from typing import Any, Callable, Union
 
 from panflute import debug
 
-import config
-from exceptions import MetadataValidationErrorItem, MetadataValidationErrorType
+from md2docx import config
+from md2docx.exceptions import MetadataValidationErrorItem, MetadataValidationErrorType
 
 
 def concat_keys(key: str, child_key: str) -> str:
@@ -64,7 +64,7 @@ def _value_validator(
 
 
 def float_validator(value: Any, **kwargs) -> bool:
-    return isinstance(value, str) and value.isnumeric()
+    return isinstance(value, (int, float)) or isinstance(value, str) and value.isnumeric()
 
 
 def integer_validator(value: Any, **kwargs) -> bool:
@@ -170,5 +170,5 @@ def get_validator(module: str) -> Callable[[Any], Union[bool, list[MetadataValid
     Returns validator function at its string package location
     """
     package, method = module.rsplit('.', 1)
-    module_object = importlib.import_module(package)
+    module_object = importlib.import_module(config.BASE_DIR.name + '.' + package)
     return getattr(module_object, method)
