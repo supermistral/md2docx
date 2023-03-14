@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import BaseSettings, RedisDsn, AmqpDsn
+from pydantic import BaseSettings, RedisDsn, AmqpDsn, PostgresDsn
 from celery.schedules import crontab
 
 
@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     HOST_URL: str = os.environ.get('HOST_URL', 'localhost')
     HOST_PORT: int = int(os.environ.get('HOST_PORT', 8000))
     BASE_URL: str = f'{HOST_HTTP}{HOST_URL}:{HOST_PORT}'
+    FRONTEND_BASE_URL: str = f'{HOST_HTTP}{HOST_URL}:3000'
     ALLOWED_ORIGINS: list[str] = os.environ.get('ALLOWED_ORIGINS', '*').split()
 
     CELERY_broker_url: AmqpDsn = os.environ.get('CELERY_BROKER_URL')
@@ -37,6 +38,8 @@ class Settings(BaseSettings):
     MEDIA_URL: str = 'media'
     MEDIA_ROOT: Path = BASE_DIR / MEDIA_URL
     SESSION_ROOT: Path = MEDIA_ROOT / 'md2docx' / 'session'
+
+    DATABASE_URL: PostgresDsn
 
 
 class DevelopmentSettings(Settings):
