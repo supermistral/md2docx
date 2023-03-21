@@ -10,10 +10,10 @@ class Settings(BaseSettings):
     PROJECT_TITLE: str = "Markdown-to-word app"
     PROJECT_DESCRIPTION: str = "App allowing translate Markdown code to Word file .docx"
     PROJECT_VERSION: str = "1.0"
-    SECRET_KEY: str = os.environ.get('SECRET_KEY')
-    HOST_HTTP: str = os.environ.get('HOST_HTTP', 'http://')
-    HOST_URL: str = os.environ.get('HOST_URL', 'localhost')
-    HOST_PORT: int = int(os.environ.get('HOST_PORT', 8000))
+    SECRET_KEY: str
+    HOST_HTTP: str = 'http://'
+    HOST_URL: str = 'localhost'
+    HOST_PORT: int = 8000
     BASE_URL: str = f'{HOST_HTTP}{HOST_URL}:{HOST_PORT}'
     FRONTEND_BASE_URL: str = f'{HOST_HTTP}{HOST_URL}:3000'
     ALLOWED_ORIGINS: list[str] = os.environ.get('ALLOWED_ORIGINS', '*').split()
@@ -29,9 +29,9 @@ class Settings(BaseSettings):
         }
     }
 
-    SESSION_BACKEND_URL: str = os.environ.get('SESSION_BACKEND_URL')
+    SESSION_BACKEND_URL: str
     SESSION_COOKIE: str = 'session'
-    SESSION_MAX_AGE: Optional[int] = os.environ.get('SESSION_MAX_AGE', 20)
+    SESSION_MAX_AGE: Optional[int] = 20
 
     BASE_DIR: Path = Path(__file__).resolve().parent
 
