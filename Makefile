@@ -1,4 +1,5 @@
 DC = docker-compose -f docker-compose.yml -p md2docx
+DC_TESTS = docker-compose -f docker-compose.tests.yml -p md2docx-tests
 
 API_SERVICE = api
 ALEMBIC_PATH = ./backend/migrations
@@ -31,6 +32,9 @@ recreate-db: delete-db up
 	sleep 8
 	$(MAKE) makemigrations "init"
 	$(MAKE) migrate
+
+tests:
+	$(DC_TESTS) up --build
 
 %:
 	@:

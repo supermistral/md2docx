@@ -20,7 +20,7 @@ class MarkdownForm:
         self.images_names = images_names
 
 
-class TaskBase:
+class TaskBase(BaseModel):
     status: str
 
 
