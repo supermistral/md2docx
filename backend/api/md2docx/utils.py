@@ -2,8 +2,7 @@ import shutil
 import json
 import re
 from pathlib import Path
-from tempfile import SpooledTemporaryFile
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, BinaryIO
 
 from celery.result import AsyncResult
 
@@ -35,7 +34,7 @@ def save_file(file: Path, content: str) -> None:
         f.write(content)
 
 
-def save_file_by_chunk(file: SpooledTemporaryFile, name: Union[Path, str]) -> None:
+def save_file_by_chunk(file: BinaryIO, name: Union[Path, str]) -> None:
     with open(name, 'wb+') as f:
         shutil.copyfileobj(file, f)
 

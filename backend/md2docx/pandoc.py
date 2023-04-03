@@ -1,3 +1,4 @@
+import sys
 from typing import Callable, Optional
 
 from panflute import run_filters, debug, Element, Doc
@@ -5,10 +6,12 @@ from panflute import run_filters, debug, Element, Doc
 # Check for isolated run as a pandoc filter
 # Need to make the root directory visible
 try:
+    sys.path.append('.')
     import md2docx
 except ModuleNotFoundError:
-    import sys
-    sys.path.append('..')
+    sys.path[-1] = '..'
+
+debug(sys.path)
 
 from pandoc.helpers import validate_metadata
 from pandoc.filters import (
