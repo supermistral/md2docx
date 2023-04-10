@@ -1,14 +1,18 @@
 from typing import Type, Optional
 
 from panflute import (
-    debug, Element, Inline, Image, Span, Str, Space, RawInline, Caption, Block,
-    Header, Plain, Doc, ListItem, BulletList, OrderedList, Div, Para, RawBlock,
-    ListContainer)
+    debug, convert_text, stringify, Element, Inline, Image, Span, Str, Space,
+    RawInline, Caption, Block, Header, Plain, Doc, ListItem, BulletList,
+    OrderedList, Div, Para, RawBlock, ListContainer, Cite,
+)
 
 import config
 from utils import pack_attributes, escape_text_with_attributes
 from validators import get_validator
 from pandoc import oxml
+from pandoc.helpers import is_bibliography
+from pandoc.handlers import BibliographyHandler
+from pandoc.utils import convert_text_to_content
 
 
 class NumberedBlock:
@@ -120,21 +124,42 @@ class TableCaptionFilter(CaptionBaseFilter):
         elem.content = [Plain(caption)]
 
 
+class BibliographyFilter(BaseFilter):
+    """Фильтр для установки списка литературы и замены ссылок"""
+
+    def run(self, elem: Element, doc: Doc):
+        if is_bibliography(elem):
+            handler = BibliographyHandler()
+            bibliography_list = handler()
+
+            # Convert strings to ordered list items
+            elems = [Plain(*convert_text_to_content(item))
+                     for item in bibliography_list]
+            elems = [ListItem(x) for x in elems]
+
+            elem = OrderedList(*elems, *elem.content)
+
+            return elem
+        elif isinstance(elem, Cite):
+            id = stringify(elem)
+
+            # TODO: upgrade Cite recognition
+            if id.startswith('@'):
+                handler = BibliographyHandler()
+                ref = handler.get_reference(id[1:])
+
+                return Span(*convert_text_to_content(ref))
+
+
 class ListFilter(BaseFilter):
     """Фильтр для установки стилей списков (обычных и литературы)"""
-
-    def check_bibliography(self, elem: Element) -> bool:
-        for elem_class in elem.classes:
-            if elem_class.lower() in config.BIBLIOGRAPHY_LIST_CLASSES:
-                return True
-        return False
 
     def run(self, elem: Element, doc: Doc):
         if isinstance(elem, (OrderedList, BulletList)):
             # Check list for bibliography
-            is_bibliography = isinstance(elem.parent, Div) and self.check_bibliography(elem.parent)
+            is_bibl = is_bibliography(elem)
 
-            if is_bibliography and not isinstance(elem, OrderedList):
+            if is_bibl and not isinstance(elem, OrderedList):
                 elem = OrderedList(*elem.content)
 
             for list_item in elem.content:
@@ -144,11 +169,11 @@ class ListFilter(BaseFilter):
                     # Using the Para element to avoid setting 'Compact' style for list
                     list_item.content[0] = Div(
                         Para(*block.content),
-                        attributes={'custom-style': 'Bibliography' if is_bibliography else 'Body Text'}
+                        attributes={'custom-style': 'Bibliography' if is_bibl else 'Body Text'}
                     )
 
             # Add page break after bibliography + add header
-            if is_bibliography:
+            if is_bibl:
                 pagebreak_raw_block = oxml.to_raw_block(oxml.PAGEBREAK)
                 return Div(
                     Header(Str("Список использованной литературы"), level=1),

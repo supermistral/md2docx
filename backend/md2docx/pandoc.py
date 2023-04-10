@@ -11,17 +11,28 @@ try:
 except ModuleNotFoundError:
     sys.path[-1] = '..'
 
-debug(sys.path)
-
 from pandoc.helpers import validate_metadata
+from pandoc.handlers import BaseHandler, BibliographyHandler
 from pandoc.filters import (
     BaseFilter, ImageCaptionFilter, TableCaptionFilter, HeaderFilter,
-    ListFilter, DocMetadataFilter, AttributeTaggingFilter
+    ListFilter, DocMetadataFilter, AttributeTaggingFilter, BibliographyFilter,
 )
 
 
 def prepare(doc: Doc) -> None:
     validate_metadata(doc)
+
+    handlers: list[BaseHandler] = [
+        BibliographyHandler
+    ]
+
+    # Run initial setup of handlers
+    for handler in handlers:
+        handler(doc=doc)
+
+
+def finalize(doc: Doc) -> None:
+    pass
 
 
 def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
@@ -29,6 +40,7 @@ def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
         DocMetadataFilter,
         ImageCaptionFilter,
         TableCaptionFilter,
+        BibliographyFilter,
         ListFilter,
         HeaderFilter,
         AttributeTaggingFilter

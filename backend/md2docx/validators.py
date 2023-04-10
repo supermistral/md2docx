@@ -100,6 +100,18 @@ def _is_dict_validator(key: str, value: Any, errors: list[MetadataValidationErro
     return True
 
 
+def _is_list_of_dict_validator(key: str, value: Any, errors: list[MetadataValidationErrorItem]) -> bool:
+    if not isinstance(value, list) or not all(isinstance(x, dict) for x in value):
+        errors.append(
+            MetadataValidationErrorItem(
+                key=key,
+                err_type=MetadataValidationErrorType.WRONG_VALUE_TYPE
+            )
+        )
+        return False
+    return True
+
+
 def _existing_attributes_validator(
     key: str,
     value: Any,
@@ -163,6 +175,11 @@ def list_validator(key: str, value: Any) -> list[MetadataValidationErrorItem]:
         errors += _value_validator(key=key, current_key=current_key, value=current_value)
 
     return errors
+
+
+def bibliography_validator(key: str, value: Any) -> list[MetadataValidationErrorItem]:
+    # TODO:
+    return []
 
 
 def get_validator(module: str) -> Callable[[Any], Union[bool, list[MetadataValidationErrorItem]]]:
