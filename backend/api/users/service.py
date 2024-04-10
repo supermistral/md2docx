@@ -12,8 +12,9 @@ from md2docx.pandoc.helpers import validate_metadata_from_dict
 from .utils import to_base64, from_base64
 from .models import MarkdownMetadata as MarkdownMetadataModel
 from .schemas import (
-    MarkdownMetadata, MarkdownMetadataCreate,
-    MarkdownMetadataErrorType
+    MarkdownMetadata,
+    MarkdownMetadataCreate,
+    MarkdownMetadataErrorType,
 )
 from ..config import settings
 from ..exceptions import BaseException

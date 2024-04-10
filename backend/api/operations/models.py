@@ -16,6 +16,7 @@ class Operation(Base, IdMixin):
 
     status: Mapped[str] = mapped_column(default=OperationStatus.PENDING)
     response: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, default=None)
+    error: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, default=None)
     metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, default=None)
     created_by: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(
