@@ -5,7 +5,7 @@ from starlette.middleware.cors import CORSMiddleware
 from .config import settings
 from .celery import create_app as create_celery_app
 from .exceptions import BaseException, base_exception_handler
-from .md2docx.router import router as md2docx_router
+from .documents.router import router as documents_router
 from .users.router import router as users_router
 from .session.middleware import SessionMiddleware
 
@@ -37,7 +37,7 @@ def create_app() -> FastAPI:
     )
 
     router = APIRouter(prefix='/api')
-    router.include_router(md2docx_router)
+    router.include_router(documents_router)
     router.include_router(users_router)
 
     app.include_router(router)
