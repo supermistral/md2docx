@@ -10,15 +10,23 @@ from .processing import start_post_processing, start_win_processing
 __all__ = ['run_processing', 'run_win_processing', 'run_post_processing']
 
 
-def run_processing(input_file: str, output_file: Optional[str] = None) -> None:
+def run_processing(
+    input_file: str,
+    output_file: Optional[str] = None,
+    media_dir: Optional[str] = None,
+) -> None:
     if output_file is None:
         output_file = os.path.splitext(input_file)[0] + '.docx'
+
+    if media_dir is None:
+        media_dir = os.path.dirname(input_file)
 
     command = [
         'pandoc', input_file,
         '--reference-doc', config.WORD_REFERENCE_PATH,
         '-t', 'docx',
         '--filter', config.PROCESSING_URL,
+        '--extract-media', media_dir,
         '--toc',
         '-o', output_file,
     ]

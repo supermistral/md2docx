@@ -41,6 +41,12 @@ class Settings(BaseSettings):
 
     DATABASE_URL: PostgresDsn
 
+    OBJECT_STORAGE_ACCESS_KEY_ID: str
+    OBJECT_STORAGE_SECRET_ACCESS_KEY: str
+    OBJECT_STORAGE_ENDPOINT_URL: str
+    OBJECT_STORAGE_REGION_NAME: str = "ru-central1"
+    OBJECT_STORAGE_USERS_BUCKET: str = "md2docx-users"
+
 
 class DevelopmentSettings(Settings):
     pass

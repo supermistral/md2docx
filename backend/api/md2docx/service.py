@@ -11,6 +11,7 @@ from .utils import (
     search_serialized_error
 )
 from ..config import settings
+from ..object_storage.service import ObjectStorageService
 
 
 class Md2DocxService:
@@ -47,6 +48,9 @@ class Md2DocxService:
         return str(self.get_session_dir_by_id(id) / 'pdf.pdf')
 
     def run_processing_tasks(self, id: str) -> None:
+        object_storage_service = self._get_object_storage_service()
+        object_storage_service.upload_object()
+
         md_file = self.get_markdown_file_path(id)
         docx_file = self.get_docx_file_path(id)
 
@@ -87,6 +91,11 @@ class Md2DocxService:
 
         error, detail = result
         return TaskError(error=error, detail=detail, status=status)
+
+    def _get_object_storage_service(self) -> ObjectStorageService:
+        return ObjectStorageService(
+            default_bucket=settings.OBJECT_STORAGE_USERS_BUCKET,
+        )
 
 
 def get_md2docx_service() -> Generator[Md2DocxService, None, None]:
