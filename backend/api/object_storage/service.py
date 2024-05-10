@@ -25,13 +25,17 @@ class ObjectStorageService:
         key: str,
         body: Any,
         is_file: bool = False,
+        is_binary: bool = False,
         bucket: Optional[str] = None,
         storage_class: Optional[str] = None,
     ):
         bucket = bucket or self.default_bucket
 
         if is_file:
-            return self.client.upload_file(key, bucket, body)
+            if is_binary:
+                return self.client.upload_fileobj(body, bucket, key)
+
+            return self.client.upload_file(body, bucket, key)            
 
         kwargs = {}
 
