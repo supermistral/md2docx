@@ -26,4 +26,5 @@ class Operation(Base, IdMixin):
     updated_at = Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=False),
         server_default=func.now(),
+        onupdate=func.now(),
     )
