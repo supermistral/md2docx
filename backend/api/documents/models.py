@@ -1,11 +1,13 @@
+import uuid
 from typing import Any, Optional
 
 import sqlalchemy as sa
-from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
 from ..db.base import Base
 from ..db.mixins import IdMixin
+from ..operations.models import Operation
 
 
 class DocumentTemplate(Base, IdMixin):
@@ -20,3 +22,9 @@ class DocumentRevision(Base, IdMixin):
 
     content: Mapped[str] = mapped_column(sa.Text)
     metadata: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, default=None)
+    operation_id: Mapped[uuid.UUID] = mapped_column(sa.ForeignKey("operations.id"))
+
+    operation: Mapped[Operation] = relationship(
+        back_populates="document_revision",
+        single_parent=True,
+    )

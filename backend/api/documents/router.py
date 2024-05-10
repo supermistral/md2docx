@@ -8,6 +8,8 @@ from ..md2docx.schemas import MarkdownForm, Task
 from ..md2docx.utils import get_task_result
 from ..md2docx.service import get_md2docx_service, Md2DocxService
 from ..md2docx.dependencies import verify_session
+from ..operations.service import OperationService, get_operation_service
+from ..operations.schemas import OperationCreate
 
 
 router = APIRouter(
@@ -26,14 +28,14 @@ async def post_process_md2docx(
 ) -> Any:
     session_id = request.session.get('id')
 
-    service.save_markdown(session_id, md.code)
+    operation = await service.run_markdown_to_docx_conversion(
+        markdown_code=md.code,
+        user_id=session_id,
+        images=images,
+        images_names=md.images_names,
+    )
 
-    if images is not None:
-        service.save_images(session_id, images, md.images_names)
-
-    service.run_processing_tasks(session_id)
-
-    return None
+    return operation
 
 
 @router.get('/')
