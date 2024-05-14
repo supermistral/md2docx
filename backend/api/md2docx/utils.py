@@ -7,6 +7,9 @@ from typing import Any, Optional, Union, BinaryIO
 from celery.result import AsyncResult
 
 from .schemas import TaskType
+import logging
+
+LOG = logging.getLogger(__name__)
 
 
 TASK_ID_GENERATORS = {

@@ -8,7 +8,7 @@ from ..config import settings
 
 
 engine = create_async_engine(
-    settings.DATABASE_URL
+    settings.DATABASE_URL.unicode_string(),
 )
 
 async_session = sessionmaker(

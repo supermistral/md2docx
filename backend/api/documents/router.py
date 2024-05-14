@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile
@@ -8,8 +9,8 @@ from ..md2docx.schemas import MarkdownForm, Task
 from ..md2docx.utils import get_task_result
 from ..md2docx.service import get_md2docx_service, Md2DocxService
 from ..md2docx.dependencies import verify_session
-from ..operations.service import OperationService, get_operation_service
-from ..operations.schemas import OperationCreate
+from ..operations import schemas as operations_schemas
+from ..users.utils import generate_created_by
 
 
 router = APIRouter(
@@ -19,18 +20,16 @@ router = APIRouter(
 )
 
 
-@router.post('/')
-async def post_process_md2docx(
-    request: Request,
+@router.post('/', response_model=operations_schemas.OperationResponse)
+async def process_md2docx(
     md: MarkdownForm = Depends(),
     images: Optional[list[UploadFile]] = None,
     service: Md2DocxService = Depends(get_md2docx_service),
+    user_id: str = Depends(generate_created_by),
 ) -> Any:
-    session_id = request.session.get('id')
-
     operation = await service.run_markdown_to_docx_conversion(
         markdown_code=md.code,
-        user_id=session_id,
+        user_id=user_id,
         images=images,
         images_names=md.images_names,
     )
@@ -65,4 +64,8 @@ async def get_document(
         raise HTTPException(404)
 
     path, name = file
-    return FileResponse(path, filename=name, media_type='application/octet-stream')
+    return FileResponse(
+        path,
+        filename=name,
+        media_type='application/octet-stream',
+    )

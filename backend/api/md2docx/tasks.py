@@ -1,4 +1,5 @@
-import asyncio
+import asyncio, tempfile
+from pathlib import Path
 
 from celery import shared_task
 
@@ -30,18 +31,35 @@ def post_process_md2docx(docx_file: str):
 
 
 async def _process_md2docx(operation_id: str, user_id: str):
+    directory = tempfile.TemporaryDirectory(prefix=f"{operation_id}_")
+    directory_path = Path(directory.name)
+
+    # 1. Update status for operation
     async for service in get_md2docx_service():
-        md_file = await service.get_markdown_file_path_from_operation(
+        md_file_path = await service.save_files_locally(
             operation_id=operation_id,
-        )
-        docx_file = service.get_docx_filename(
-            operation_id=operation_id,
+            directory=directory_path,
         )
 
-        run_processing(md_file, docx_file)
+    # 2. Execute processing
+    async for service in get_md2docx_service():
+        docx_filename = service.get_docx_filename(
+            operation_id=operation_id,
+        )
+        docx_file_path = directory_path / docx_filename
+
+        run_processing(
+            md_file_path,
+            docx_file_path,
+            media_dir=directory_path,
+        )
+        # run_post_processing(md_file_path)
 
         await service.done_processing(
             operation_id=operation_id,
-            docx_filename=docx_file,
+            docx_filename=docx_filename,
+            docx_file_path=docx_file_path,
             user_id=user_id,
         )
+
+    directory.cleanup()

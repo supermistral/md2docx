@@ -26,7 +26,7 @@ class TaskBase(BaseModel):
 
 class TaskError(TaskBase):
     error: str
-    detail: Any
+    details: Any
 
 
 class Task(TaskBase):
