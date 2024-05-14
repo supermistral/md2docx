@@ -1,9 +1,11 @@
+import uuid
 from enum import Enum
 from typing import Any, Optional
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel, Field
+
+from ..modeling import BaseResponse
 
 
 class OperationStatus(str, Enum):
@@ -13,26 +15,30 @@ class OperationStatus(str, Enum):
     FAILED = "failed"
 
 
-class OperationCreate(BaseModel):
-    created_by: str
-
-
 class Operation(BaseModel):
-    id: UUID
+    id: uuid.UUID
     status: OperationStatus = OperationStatus.PENDING
     response: Optional[dict[str, Any]] = None
     error: Optional[dict[str, Any]] = None
-    metadata: Optional[dict[str, Any]] = None
+    metadata_: Optional[dict[str, Any]] = None
     created_by: str
-    created_at: datetime = Field(default_factory=datetime.now)
-    updated_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
-class OperationResponse(BaseModel):
-    id: UUID
+class OperationCreate(Operation):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4)
+
+
+class OperationResponse(BaseResponse):
+    id: uuid.UUID
     status: OperationStatus
     response: Optional[dict[str, Any]]
     error: Optional[dict[str, Any]]
-    metadata: Optional[dict[str, Any]]
+    metadata_: Optional[dict[str, Any]] = Field(..., serialization_alias="metadata")
     created_at: datetime
     updated_at: datetime
+
+
+class ListOperationsResponse(BaseResponse):
+    operations: list[OperationResponse]

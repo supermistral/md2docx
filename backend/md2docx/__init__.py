@@ -30,7 +30,12 @@ def run_processing(
         '--toc',
         '-o', output_file,
     ]
-    result = subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.PIPE, encoding='utf-8')
+    result = subprocess.run(
+        command,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.PIPE,
+        encoding='utf-8',
+    )
 
     if result.returncode != 0:
         raise ProcessingError(result.stderr)

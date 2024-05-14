@@ -14,9 +14,15 @@ class OperationService:
 
     async def get_by_id(self, operation_id: str) -> Operation:
         result = await self.db.execute(
-            select(Operation).filter(Operation.id == operation_id)
+            select(Operation).where(Operation.id == operation_id)
         )
         return result.scalar_one()
+
+    async def get_all_by_created_by(self, created_by: str) -> list[Operation]:
+        result = await self.db.execute(
+            select(Operation).where(Operation.created_by == created_by)
+        )
+        return result.scalars().all()
 
     async def create(self, schema: OperationCreate) -> Operation:
         model = Operation(

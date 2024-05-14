@@ -7,6 +7,7 @@ from .celery import create_app as create_celery_app
 from .exceptions import BaseException, base_exception_handler
 from .documents.router import router as documents_router
 from .users.router import router as users_router
+from .operations.router import router as operations_router
 from .session.middleware import SessionMiddleware
 
 
@@ -36,9 +37,10 @@ def create_app() -> FastAPI:
         session_cookie=settings.SESSION_COOKIE
     )
 
-    router = APIRouter(prefix='/api')
+    router = APIRouter(prefix='/api/v1')
     router.include_router(documents_router)
     router.include_router(users_router)
+    router.include_router(operations_router)
 
     app.include_router(router)
 

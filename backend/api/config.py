@@ -2,7 +2,8 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import BaseSettings, RedisDsn, AmqpDsn, PostgresDsn
+from pydantic import RedisDsn, AmqpDsn, PostgresDsn
+from pydantic_settings import BaseSettings
 from celery.schedules import crontab
 
 
@@ -31,7 +32,7 @@ class Settings(BaseSettings):
 
     SESSION_BACKEND_URL: str
     SESSION_COOKIE: str = 'session'
-    SESSION_MAX_AGE: Optional[int] = 20
+    SESSION_MAX_AGE: Optional[int] = 20 * 60 * 60
 
     BASE_DIR: Path = Path(__file__).resolve().parent
 
