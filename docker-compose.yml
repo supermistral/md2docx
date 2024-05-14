@@ -28,7 +28,7 @@ services:
     build: ./backend
     container_name: md2docx_api
     command: |
-      sh -c "uvicorn --host 0.0.0.0 --port 8000 --reload api.main:app"
+      sh -c "uvicorn --host 0.0.0.0 --port 8000 --reload api.main:app --log-config logging.yaml"
     volumes:
       - ./backend/:/usr/src/app/
     ports:
