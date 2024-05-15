@@ -1,8 +1,10 @@
 import uuid
+from datetime import datetime
 from typing import Optional
 
 import sqlalchemy as sa
 from sqlalchemy.orm import mapped_column, Mapped
+from sqlalchemy.sql import func
 
 from ..db.base import Base
 from ..db.mixins import IdMixin
@@ -13,6 +15,16 @@ class DocumentTemplate(Base, IdMixin):
 
     name: Mapped[str] = mapped_column(sa.String(30))
     content: Mapped[str] = mapped_column(sa.Text, deferred=True)
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=False),
+        server_default=func.now(),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=False),
+        server_default=func.now(),
+        onupdate=func.now(),
+    )
+    is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True)
 
 
 class DocumentRevision(Base, IdMixin):

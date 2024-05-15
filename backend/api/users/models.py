@@ -37,7 +37,14 @@ class UserDocumentHierarchyItem(Base, IdMixin):
     user_id: Mapped[uuid.UUID] = mapped_column(sa.ForeignKey("users.id"))
     type: Mapped[str] = mapped_column(sa.String(10))
     content: Mapped[str] = mapped_column(sa.Text)
-    metadata_: Mapped[Optional[dict[str, Any]]] = mapped_column(JSONB, name="metadata", default=None)
-    path: Mapped[list[str]] = mapped_column(sa.ARRAY(sa.String), default=list)
+    metadata_: Mapped[Optional[dict[str, Any]]] = mapped_column(
+        JSONB,
+        name="metadata",
+        default=None,
+    )
+    path: Mapped[list[str]] = mapped_column(
+        sa.ARRAY(sa.String),
+        default=list,
+    )
 
     user: Mapped[User] = relationship()

@@ -1,10 +1,12 @@
-import logging
-from typing import Any, Literal, Optional
+from pathlib import Path
+from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException, Request, Depends, UploadFile
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Request, Depends, UploadFile
+from fastapi.responses import StreamingResponse
 from celery import states as celery_states
 
+from .service import DocumentsService, get_documents_service
+from .schemas import ListDocumentTemplatesResponse
 from ..md2docx.schemas import MarkdownForm, Task
 from ..md2docx.utils import get_task_result
 from ..md2docx.service import get_md2docx_service, Md2DocxService
@@ -14,13 +16,13 @@ from ..users.utils import generate_created_by
 
 
 router = APIRouter(
-    prefix='/documents',
-    tags=['documents'],
+    prefix="/documents",
+    tags=["documents"],
     dependencies=[Depends(verify_session)]
 )
 
 
-@router.post('/', response_model=operations_schemas.OperationResponse)
+@router.post("/", response_model=operations_schemas.OperationResponse)
 async def process_md2docx(
     md: MarkdownForm = Depends(),
     images: Optional[list[UploadFile]] = None,
@@ -37,7 +39,8 @@ async def process_md2docx(
     return operation
 
 
-@router.get('/')
+# DEPRECATED
+@router.get("/")
 async def get_task_response(
     request: Request,
     service: Md2DocxService = Depends(get_md2docx_service),
@@ -51,21 +54,28 @@ async def get_task_response(
     return Task(status=task.state)
 
 
-@router.get('/{doc_format}')
+@router.get("/files")
 async def get_document(
-    doc_format: Literal['docx', 'pdf'],
-    request: Request,
+    name: str,
     service: Md2DocxService = Depends(get_md2docx_service),
 ) -> Any:
-    session_id = request.session.get('id')
-    file = service.get_document(session_id, doc_format=doc_format)
+    chunks = service.get_document(
+        name=name,
+    )
+    filename = Path(name).name
 
-    if file is None:
-        raise HTTPException(404)
+    return StreamingResponse(
+        content=chunks,
+        headers={"Content-Disposition": f"attachment;filename={filename}"},
+    )
 
-    path, name = file
-    return FileResponse(
-        path,
-        filename=name,
-        media_type='application/octet-stream',
+
+@router.get("/templates", response_class=ListDocumentTemplatesResponse)
+async def get_document_templates(
+    service: DocumentsService = Depends(get_documents_service),
+):
+    templates = await service.get_all_document_templates()
+
+    return ListDocumentTemplatesResponse(
+        templates=templates,
     )
