@@ -3,7 +3,11 @@ from pathlib import Path
 
 from celery import shared_task
 
-from md2docx import run_post_processing, run_win_processing, run_processing
+from md2docx import (
+    run_post_processing,
+    run_win_processing,
+    run_processing,
+)
 
 from .service import get_md2docx_service
 from .callbacks import done_failed_processing
@@ -23,11 +27,6 @@ def process_md2docx(operation_id: str, user_id: str):
 @shared_task()
 def win_process_md2docx(docx_file: str):
     run_win_processing(docx_file)
-
-
-@shared_task()
-def post_process_md2docx(docx_file: str):
-    run_post_processing(docx_file)
 
 
 async def _process_md2docx(operation_id: str, user_id: str):

@@ -1,15 +1,14 @@
 import uuid, json, logging
 from pathlib import Path
-from typing import Any, Generator, Optional
+from typing import Generator, Optional
 
+from starlette.responses import ContentStream
 from fastapi import UploadFile
 from sqlalchemy import select, update
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from .schemas import TaskError, TaskType
+from .schemas import TaskError
 from .utils import (
     save_file,
-    get_task_id,
     search_serialized_error,
 )
 from ..config import settings
@@ -18,13 +17,15 @@ from ..documents.models import DocumentRevision
 from ..operations.models import Operation, OperationStatus
 from ..operations.schemas import OperationCreate
 from ..db.session import get_session
+from ..db.service import BaseDBService
 
 LOG = logging.getLogger(__name__)
 
 
-class Md2DocxService:
-    def __init__(self, db: AsyncSession) -> None:
-        self.db = db
+class Md2DocxService(BaseDBService):
+    """
+    Performs markdown-to-docx conversion-related operations.
+    """
 
     async def run_markdown_to_docx_conversion(
         self,
@@ -157,6 +158,15 @@ class Md2DocxService:
         )
         await self.db.commit()
 
+    def get_document(
+        self,
+        *,
+        name: str,
+    ) -> ContentStream:
+        object_storage_service = self._get_object_storage_service()
+        body = object_storage_service.get_object(key=name)
+        return body.iter_chunks()
+
     async def _create_document_revision(
         self,
         *,
@@ -229,22 +239,13 @@ class Md2DocxService:
 
         str_operation_id = str(operation_id)
 
-        processing_task_id = get_task_id(str_operation_id, TaskType.PROCESSING)
-        post_processing_task_id = get_task_id(str_operation_id, TaskType.POST_PROCESSING)
-
-        task = (
-            process_md2docx.subtask(
-                kwargs={
-                    "operation_id": operation_id,
-                    "user_id": user_id,
-                },
-                task_id=processing_task_id,
-            )
-            # | post_process_md2docx.subtask(
-            #     (docx_filename,),
-            #     task_id=post_processing_task_id,
-            # )
-        ).apply_async(task_id=str_operation_id)
+        process_md2docx.apply_async(
+            kwargs={
+                "operation_id": operation_id,
+                "user_id": user_id,
+            },
+            task_id=str_operation_id,
+        )
 
     async def _get_document_revision(
         self,
