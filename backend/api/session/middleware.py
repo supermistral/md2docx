@@ -65,8 +65,8 @@ class SessionMiddleware:
         else:
             scope["session"] = {}
 
-        # Generate session id when POST request is made
-        if scope["method"] == "POST":
+        # Generate session id if it's not set yet
+        if "id" not in scope["session"]:
             scope["session"]["id"] = await session_storage.generate_session_id()
             session_generated = True
 
