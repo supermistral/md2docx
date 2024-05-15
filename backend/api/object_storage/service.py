@@ -2,6 +2,7 @@ from typing import Any, Optional
 
 import boto3
 
+from .decorators import with_error_wrapper
 from .session import SESSION
 from ..config import settings
 
@@ -19,6 +20,7 @@ class ObjectStorageService:
         )
         self.default_bucket = default_bucket
 
+    @with_error_wrapper
     def upload_object(
         self,
         *,
@@ -49,6 +51,7 @@ class ObjectStorageService:
             **kwargs,
         )
 
+    @with_error_wrapper
     def get_object(
         self,
         key: str,
