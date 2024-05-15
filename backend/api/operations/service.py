@@ -20,7 +20,9 @@ class OperationService:
 
     async def get_all_by_created_by(self, created_by: str) -> list[Operation]:
         result = await self.db.execute(
-            select(Operation).where(Operation.created_by == created_by)
+            select(Operation)
+            .where(Operation.created_by == created_by)
+            .order_by(Operation.created_at.desc())
         )
         return result.scalars().all()
 
