@@ -2,9 +2,10 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import RedisDsn, AmqpDsn, PostgresDsn
+from pydantic import RedisDsn, AmqpDsn, PostgresDsn, computed_field
 from pydantic_settings import BaseSettings
 from celery.schedules import crontab
+from fastapi_jwt_auth import AuthJWT
 
 
 class Settings(BaseSettings):
@@ -49,6 +50,15 @@ class Settings(BaseSettings):
     OBJECT_STORAGE_USERS_BUCKET: str = "md2docx-users"
 
 
+class AuthJwtSettings(BaseSettings):
+    authjwt_token_location: set[str] = {"cookies"}
+    authjwt_cookie_csrf_protect: bool = False
+
+    @property
+    def authjwt_secret_key(self) -> str:
+        return self.SECRET_KEY
+
+
 class DevelopmentSettings(Settings):
     pass
 
@@ -72,3 +82,8 @@ def get_settings() -> Settings:
 
 
 settings = get_settings()
+
+
+@AuthJWT.load_config
+def _get_auth_jwt_config():
+    return AuthJwtSettings()
