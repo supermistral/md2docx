@@ -20,6 +20,7 @@ email-validator==2.1.1
 exceptiongroup==1.1.1
 fastapi==0.111.0
 fastapi-cli==0.0.3
+PyJWT==1.7.1
 greenlet==2.0.2
 h11==0.14.0
 httpcore==0.16.3
