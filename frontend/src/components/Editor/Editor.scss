@@ -1,0 +1,79 @@
+@import "../../variables";
+
+.main-container {
+    display: flex;
+    height: 100%;
+}
+
+.editor {
+    display: flex;
+    flex-grow: 1;
+    max-width: $contentWidth;
+    margin: 0 auto;
+    font-family: Lato,Helvetica Neue,Helvetica,sans-serif;
+    font-size: 15px;
+
+    & > * {
+        width: 50%;
+    }
+
+    .editor-area {
+        padding: 0.5em 1.5em;
+        overflow: auto;
+        height: 100%;
+        font-size: 15px;
+    }
+
+    .editor-preview {
+        background-color: $colorEditorPreview;
+        line-height: 1.5;
+        word-break: break-all;
+
+        h1, h2, h3, h4, h5, h6 {
+            margin: 1.8em 0;
+        }
+
+        p, math {
+            margin: 1.2em 0;
+        }
+
+        pre {
+            white-space: pre-wrap;
+        }
+
+        code {
+            background: rgba(0, 0, 0, .05);
+        }
+
+        a {
+            color: rgb(44, 178, 255);
+            text-decoration: underline;
+        }
+    
+        blockquote {
+            color: rgba(0, 0, 0, .5);
+            padding-left: 1.5em;
+            border-left: 5px solid rgba(0, 0, 0, .1);
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+
+            td, th {
+                border: 1px solid #dcdcdc;
+                padding: 8px 12px;
+            }
+        }
+    }
+
+    .editor-input {
+        textarea {
+            width: 100%;
+            outline: none;
+            resize: none;
+            margin: 0;
+            border: 0;
+        }
+    }
+}

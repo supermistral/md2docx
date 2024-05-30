@@ -13,7 +13,7 @@ export interface SidebarProps {
 }
 
 
-const Sidebar = ({ onRunProcessMarkdownClick, task }: SidebarProps) => {
+export const Sidebar = ({ onRunProcessMarkdownClick, task }: SidebarProps) => {
     const editorQueryState = useSelector(selectEditorQueryState);
 
     const isLoading = useMemo(() => (
@@ -59,5 +59,3 @@ const Sidebar = ({ onRunProcessMarkdownClick, task }: SidebarProps) => {
         </div>
     )
 }
-
-export default Sidebar;

@@ -1,22 +1,31 @@
 import React, { useCallback, useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import {citePlugin as remarkCite} from "@benrbray/remark-cite";
 import remarkGfm from "remark-gfm";
+import remarkMath from "remark-math";
+import remarkFrontmatter from "remark-frontmatter";
+import remarkExtendedTable from "remark-extended-table";
+import rehypeHighlight from "rehype-highlight";
+import rehypeKatex from "rehype-katex";
 import { remarkBlockMetadataFilter, remarkFrontmatterFilter } from "../../markdown/filters";
+// import Sidebar from "./Sidebar/Sidebar";
 import { useLazyGetTaskQuery, useProcessMarkdownMutation } from "../../redux/api/md2docxApi";
-import "./Home.scss";
+import "./Editor.scss";
 import { useSelector } from "react-redux";
 import { selectEditorQueryState } from "../../redux/selectors/editor";
 import { EditorQueryState } from "../../redux/types";
-
+import useAppBarHeight from "../../tools/hooks/layout";
 
 const PROCESS_MARKDOWN_QUERY_INTERVAL = 3000;
 
 
-const Home = () => {
+const Editor = () => {
     const [text, setText] = useState<string>("");
 
     const [getTask, { data: taskData, error: taskError }] = useLazyGetTaskQuery();
     const [runProcessMarkdown, { data: processMarkdownData }] = useProcessMarkdownMutation();
+
+    const appBarHeight = useAppBarHeight();
 
     const editorQueryState = useSelector(selectEditorQueryState);
 
@@ -43,7 +52,12 @@ const Home = () => {
     }, [text]);
 
     return (
-        <div className="main-container">
+        <div
+            className="main-container"
+            style={{
+                height: `calc(100% - ${appBarHeight}px)`,
+            }}
+        >
             {/* <Sidebar
                 onRunProcessMarkdownClick={handleRunProcessMarkdown}
                 task={taskData}
@@ -58,8 +72,16 @@ const Home = () => {
                         className="editor-area"
                         remarkPlugins={[
                             remarkGfm,
-                            remarkFrontmatterFilter,
-                            remarkBlockMetadataFilter,
+                            // [remarkCite, {}],
+                            remarkMath,
+                            remarkExtendedTable,
+                            remarkFrontmatter,
+                            // remarkFrontmatterFilter,
+                            // remarkBlockMetadataFilter,
+                        ]}
+                        rehypePlugins={[
+                            [rehypeHighlight, {fragment: true}],
+                            rehypeKatex,
                         ]}
                     />
                 </div>
@@ -71,4 +93,4 @@ const Home = () => {
     )
 }
 
-export default Home;
+export default Editor;

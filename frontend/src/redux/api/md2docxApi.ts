@@ -5,9 +5,9 @@ import { TaskResponse } from "../types";
 
 
 export const md2docxApi = createApi({
-    reducerPath: 'md2docx',
-    baseQuery: fetchBaseQuery({ baseUrl: `${API_URL}/md2docx` }),
-    tagTypes: ['md2docx'],
+    reducerPath: 'documents',
+    baseQuery: fetchBaseQuery({ baseUrl: `${API_URL}/documents` }),
+    tagTypes: ['documents'],
     endpoints: (builder) => ({
         processMarkdown: builder.mutation<any, FormData>({
             query: (body) => ({
