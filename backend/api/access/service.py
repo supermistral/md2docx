@@ -42,7 +42,6 @@ class AccessService(BaseDBService):
     ) -> User:
         schema.password = hash_password(schema.password)
         model = User(**schema.model_dump())
-        # model.password = 
 
         self.db.add(model)
 

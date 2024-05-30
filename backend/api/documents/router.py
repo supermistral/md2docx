@@ -24,11 +24,14 @@ router = APIRouter(
 
 @router.post("/", response_model=operations_schemas.OperationResponse)
 async def process_md2docx(
+    request: Request,
     md: MarkdownForm = Depends(),
     images: Optional[list[UploadFile]] = None,
     service: Md2DocxService = Depends(get_md2docx_service),
-    user_id: str = Depends(generate_created_by),
+    # user_id: str = Depends(generate_created_by),
 ) -> Any:
+    user_id = generate_created_by(request)
+
     operation = await service.run_markdown_to_docx_conversion(
         markdown_code=md.code,
         user_id=user_id,
@@ -70,7 +73,7 @@ async def get_document(
     )
 
 
-@router.get("/templates", response_class=ListDocumentTemplatesResponse)
+@router.get("/templates", response_model=ListDocumentTemplatesResponse)
 async def get_document_templates(
     service: DocumentsService = Depends(get_documents_service),
 ):

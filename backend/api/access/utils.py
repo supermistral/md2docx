@@ -3,8 +3,8 @@ import uuid
 
 
 def check_password(input_value: str, db_value: str) -> bool:
-    password, salt = input_value.split(":")
-    return password == hashlib.sha256(salt.encode() + db_value.encode()).hexdigest()
+    password, salt = db_value.split(":")
+    return password == hashlib.sha256(salt.encode() + input_value.encode()).hexdigest()
 
 
 def hash_password(input_value: str) -> str:

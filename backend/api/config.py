@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 from typing import Any, Optional
 
-from pydantic import RedisDsn, AmqpDsn, PostgresDsn, computed_field
+from pydantic import RedisDsn, AmqpDsn, PostgresDsn, Field
 from pydantic_settings import BaseSettings
 from celery.schedules import crontab
 from fastapi_jwt_auth import AuthJWT
@@ -53,10 +53,9 @@ class Settings(BaseSettings):
 class AuthJwtSettings(BaseSettings):
     authjwt_token_location: set[str] = {"cookies"}
     authjwt_cookie_csrf_protect: bool = False
-
-    @property
-    def authjwt_secret_key(self) -> str:
-        return self.SECRET_KEY
+    authjwt_secret_key: str = Field(..., validation_alias="SECRET_KEY")
+    authjwt_access_cookie_key: str = "auth_access_token"
+    authjwt_refresh_cookie_key: str = "auth_refresh_token"
 
 
 class DevelopmentSettings(Settings):

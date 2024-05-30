@@ -31,10 +31,6 @@ def prepare(doc: Doc) -> None:
         handler(doc=doc)
 
 
-def finalize(doc: Doc) -> None:
-    pass
-
-
 def get_filters() -> list[Callable[[Element, Doc], Optional[Element]]]:
     filter_classes: list[BaseFilter] = [
         DocMetadataFilter,

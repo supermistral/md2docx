@@ -25,12 +25,12 @@ async def signup(
     return user
 
 
-@router.post("/login")
+@router.post("/login", response_model=schemas.LoginResponse)
 async def login(
     schema: schemas.LoginRequest,
     Authorize: AuthJWT = Depends(),
     service: AccessService = Depends(get_access_service),
-):
+) -> tuple[str, str]:
     user = await service.login(
         email=schema.email,
         password=schema.password,
@@ -42,8 +42,13 @@ async def login(
     Authorize.set_access_cookies(access_token)
     Authorize.set_refresh_cookies(refresh_token)
 
+    return schemas.LoginResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+    )
 
-@router.post("/refresh")
+
+@router.post("/refresh", response_model=schemas.RefreshResponse)
 async def refresh(
     Authorize: AuthJWT = Depends(),
 ):
@@ -53,6 +58,10 @@ async def refresh(
     access_token = Authorize.create_access_token(subject=user)
 
     Authorize.set_access_cookies(access_token)
+
+    return schemas.RefreshResponse(
+        access_token=access_token,
+    )
 
 
 @router.get("/logout")
